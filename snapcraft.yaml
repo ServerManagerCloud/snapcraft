@@ -1,0 +1,31 @@
+name: server-manager-cloud
+version: '0.0.0.1'
+summary: A simple "Hello, World!" Go app
+description: |
+  A simple Go program that prints "Hello, World!" to the console.
+base: core20
+confinement: strict
+grade: devel
+
+apps:
+  server-manager-cloud:
+    command: server-manager-cloud    
+    plugs:
+      - home
+      - docker
+parts:
+  server-manager-cloud:
+    build-packages:
+      - git             # Ensure Git is available during build
+      - docker.io       # Ensure Docker CLI is available during build
+      - docker-compose  # Ensure Docker Compose is available during build
+    stage-packages:
+      - git             # Git for runtime
+      - docker.io       # Docker CLI for runtime
+      - docker-compose  # Docker Compose for runtime
+    plugin: go
+    source: https://github.com/ServerManagerCloud/snapcraft.git
+    source-type: git
+    override-build: |
+      go build -o server-manager-cloud  # Build binary
+      install -Dm755 server-manager-cloud $SNAPCRAFT_PART_INSTALL/server-manager-cloud
