@@ -19,5 +19,5 @@ parts:
     source: git@github.com:ServerManagerCloud/snapcraft.git
     source-type: git
     override-build: |
-      go build -o server-manager-cloud  # Build binary
+      GOOS=linux GOARCH=amd64 go build -o server-manager-cloud  # Build binary
       install -Dm755 server-manager-cloud $SNAPCRAFT_PART_INSTALL/server-manager-cloud
