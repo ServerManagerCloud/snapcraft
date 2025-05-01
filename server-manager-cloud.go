@@ -59,7 +59,7 @@ func handleHelp(helpCmd *flag.FlagSet) {
 func handleCronJob(cronCmd *flag.FlagSet) {
 	cronCmd.Parse(os.Args[2:])
 
-	binaries := []string{"bin/cpu", "bin/memory", "bin/disks"} // List of binaries to execute
+	binaries := []string{"bin/cpu"} // List of binaries to execute
 
 	for _, binary := range binaries {
 		go func(bin string) {
