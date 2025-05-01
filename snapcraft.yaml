@@ -15,14 +15,6 @@ apps:
       - docker
 parts:
   server-manager-cloud:
-    build-packages:
-      - git             # Ensure Git is available during build
-      - docker.io       # Ensure Docker CLI is available during build
-      - docker-compose  # Ensure Docker Compose is available during build
-    stage-packages:
-      - git             # Git for runtime
-      - docker.io       # Docker CLI for runtime
-      - docker-compose  # Docker Compose for runtime
     plugin: go
     source: git@github.com:ServerManagerCloud/snapcraft.git
     source-type: git

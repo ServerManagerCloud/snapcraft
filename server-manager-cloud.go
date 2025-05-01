@@ -59,7 +59,7 @@ func handleHelp(helpCmd *flag.FlagSet) {
 func handleCronJob(cronCmd *flag.FlagSet) {
 	cronCmd.Parse(os.Args[2:])
 
-	binaries := []string{"bin/cpu"} // List of binaries to execute
+	binaries := []string{"bin/cpu", "bin/memory", "bin/disks"} // List of binaries to execute
 
 	for _, binary := range binaries {
 		go func(bin string) {
@@ -80,31 +80,51 @@ func handleCronJob(cronCmd *flag.FlagSet) {
 	select {}
 }
 
-// handleAuth fetches a token from PocketBase.io and stores it in auth.json
 func handleAuth(authCmd *flag.FlagSet) {
 	authCmd.Parse(os.Args[2:])
 
-	fmt.Print("Enter your PocketBase.io username: ")
-	var username string
-	fmt.Scanln(&username)
+	// Load username and password from auth.json
+	authData := loadAuthCredentials()
+	if authData == nil {
+		log.Fatalf("Failed to load credentials from %s. Ensure it has 'username' and 'password' fields.", AuthFile)
+	}
 
-	fmt.Print("Enter your PocketBase.io password: ")
-	var password string
-	fmt.Scanln(&password)
-
-	token, err := authenticateWithPocketBase(username, password)
+	token, err := authenticateWithPocketBase(authData.Username, authData.Password)
 	if err != nil {
 		log.Fatalf("Authentication failed: %s", err)
 	}
 
-	authData := AuthToken{Token: token}
-	saveAuthToken(authData)
+	authToken := AuthToken{Token: token}
+	saveAuthToken(authToken)
 	fmt.Println("Authentication successful! Token saved to auth.json.")
+}
+
+// AuthCredentials represents the structure of the credentials in auth.json
+type AuthCredentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// loadAuthCredentials reads the username and password from auth.json
+func loadAuthCredentials() *AuthCredentials {
+	data, err := ioutil.ReadFile(AuthFile)
+	if err != nil {
+		log.Printf("Failed to read %s: %s", AuthFile, err)
+		return nil
+	}
+
+	var credentials AuthCredentials
+	if err := json.Unmarshal(data, &credentials); err != nil {
+		log.Printf("Failed to parse %s: %s", AuthFile, err)
+		return nil
+	}
+
+	return &credentials
 }
 
 // authenticateWithPocketBase handles authentication with PocketBase.io
 func authenticateWithPocketBase(username, password string) (string, error) {
-	url := "https://your-pocketbase-url/api/auth" // Replace with your PocketBase.io API URL
+	url := "https://admin.server-manager.cloud/api/auth" // Replace with your PocketBase.io API URL
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
